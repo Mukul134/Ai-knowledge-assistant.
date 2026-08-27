@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # Nginx Reverse Proxy (SSL Gateway)
+  reverse-proxy:
+    image: nginx:alpine
+    container_name: proxy_service
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # SSL certificate mounts for Let's Encrypt certificates (configured in Hostinger steps)
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - app_network
+    depends_on:
+      - frontend
+      - backend
+    restart: always
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: frontend_service
+    environment:
+      - NEXT_PUBLIC_API_URL=https://${DOMAIN_NAME}
+      - NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+    networks:
+      - app_network
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # FastAPI Backend (incorporates MCP subprocess)
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: backend_service
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - PORT=8000
+      - CORS_ORIGINS=["https://${DOMAIN_NAME}"]
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - MCP_SERVER_PATH=mcp-server/mcp_server.py
+    networks:
+      - app_network
+    volumes:
+      - ../mcp-server:/app/mcp-server
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  app_network:
+    driver: bridge

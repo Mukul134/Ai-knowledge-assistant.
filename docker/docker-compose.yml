@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_SUPABASE_URL=https://lvyhsugsrayhsbjxopmo.supabase.co
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_FKI4Woj13vu15QuaLQi3XQ_Bzq90q_D
+    networks:
+      - app_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+
+  # FastAPI Backend (runs python agent, parser, and embeds client)
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - PORT=8000
+      - CORS_ORIGINS=["http://localhost:3000", "http://localhost"]
+      - OPENAI_API_KEY=$OPENAI_API_KEY
+      - OPENAI_MODEL=gpt-4o-mini
+      - OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+      - SUPABASE_URL=$SUPABASE_URL
+      - SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+      - SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
+      - SUPABASE_JWT_SECRET=$SUPABASE_JWT_SECRET
+      - MCP_SERVER_PATH=mcp-server/mcp_server.py
+    networks:
+      - app_network
+    volumes:
+      # Mount the sibling directory to run MCP server subprocess in backend container
+      - ../mcp-server:/app/mcp-server
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+
+networks:
+  app_network:
+    driver: bridge
