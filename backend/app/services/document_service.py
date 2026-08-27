@@ -190,7 +190,7 @@ class DocumentService:
     def list_documents(current_user: CurrentUser, jwt_token: str) -> List[Dict[str, Any]]:
         """List all documents uploaded by the authenticated user."""
         user_supabase = get_supabase_user_client(jwt_token)
-        response = user_supabase.table("documents").select("*").order("created_at", descending=True).execute()
+        response = user_supabase.table("documents").select("*").order("created_at", desc=True).execute()
         return response.data
 
     @staticmethod

@@ -42,7 +42,7 @@ class ChatService:
         try:
             response = user_supabase.table("chat_sessions") \
                 .select("*") \
-                .order("updated_at", descending=True) \
+                .order("updated_at", desc=True) \
                 .execute()
             return response.data or []
         except Exception as e:
@@ -159,7 +159,7 @@ class ChatService:
             response = user_supabase.table("messages") \
                 .select("*") \
                 .eq("session_id", session_id) \
-                .order("created_at", descending=False) \
+                .order("created_at", desc=False) \
                 .execute()
             return response.data or []
         except Exception as e:

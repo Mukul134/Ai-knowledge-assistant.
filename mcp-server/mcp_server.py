@@ -150,7 +150,7 @@ async def list_documents() -> str:
             
         db_response = supabase_user.table("documents") \
             .select("id, file_name, file_size, page_count, status, created_at") \
-            .order("created_at", descending=True) \
+            .order("created_at", desc=True) \
             .execute()
             
         docs = db_response.data or []

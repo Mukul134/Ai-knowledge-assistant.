@@ -23,7 +23,8 @@ class OpenAIClient:
         try:
             response = await self.client.embeddings.create(
                 input=texts,
-                model=settings.OPENAI_EMBEDDING_MODEL
+                model=settings.OPENAI_EMBEDDING_MODEL,
+                timeout=60.0
             )
             # OpenAI returns list of embeddings ordered identically to the inputs list
             return [data.embedding for data in response.data]

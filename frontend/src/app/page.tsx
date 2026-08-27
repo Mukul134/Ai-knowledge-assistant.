@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { MessageSquare, ArrowRight, CheckCircle2, Shield, Brain, Files } from "lucide-react";
 
 interface HealthData {
   status: string;
@@ -39,85 +41,117 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 text-zinc-100 p-6 font-sans">
-      <div className="w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl space-y-8 backdrop-blur-md">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+      
+      {/* 1. HERO HEADER SECTION */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-5xl mx-auto w-full text-center space-y-8 my-12">
         
-        {/* Header */}
-        <div className="space-y-2 border-b border-zinc-800 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="h-4 w-4 rounded-full bg-indigo-500 animate-pulse" />
-            <span className="text-xs uppercase tracking-widest text-zinc-400 font-semibold">Phase 1 Active</span>
-          </div>
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
-            AI Knowledge Assistant
-          </h1>
-          <p className="text-sm text-zinc-400">
-            System initialization verification and project workspace config dashboard.
-          </p>
+        {/* Release Tag */}
+        <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/25 px-3.5 py-1.5 rounded-full text-xs font-semibold text-indigo-400">
+          <span className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
+          Production-Ready Release
         </div>
 
-        {/* Workspace Health Section */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-zinc-300">Monorepo Integration Status</h2>
+        {/* Title */}
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight max-w-3xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">
+          Your Private Agentic AI Knowledge Assistant
+        </h1>
+
+        {/* Subtext */}
+        <p className="text-sm md:text-base text-zinc-400 max-w-2xl leading-relaxed">
+          Upload PDF files, chunk text segments automatically, and run conversational RAG chats. 
+          Powered by an isolated stdio MCP server, pgvector similarity search, and OpenAI models.
+        </p>
+
+        {/* Action CTAs */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+          <Link
+            href="/dashboard"
+            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl px-8 py-3.5 text-sm shadow-xl flex items-center justify-center gap-2 transition-all group"
+          >
+            Go to Workspace Dashboard <ArrowRight size={16} className="group-hover:translate-x-1.5 transition-transform" />
+          </Link>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            {/* Backend Service Status */}
-            <div className="bg-zinc-950 p-5 rounded-xl border border-zinc-800/80 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-zinc-400">Backend API</span>
-                {loading ? (
-                  <span className="text-xs text-zinc-500">Checking...</span>
-                ) : error ? (
-                  <span className="text-xs font-semibold text-rose-500 bg-rose-500/10 px-2 py-0.5 rounded-full">Offline</span>
-                ) : (
-                  <span className="text-xs font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">Online</span>
-                )}
-              </div>
-              <div className="text-xs text-zinc-500 space-y-1">
-                <p>Host: <span className="font-mono text-zinc-300">localhost:8000</span></p>
-                <p>Status: <span className="font-mono text-zinc-300">{health?.status || "Unknown"}</span></p>
-              </div>
+          <Link
+            href="/login"
+            className="w-full sm:w-auto bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-semibold rounded-xl px-8 py-3.5 text-sm transition-all text-center"
+          >
+            Access Account / Log In
+          </Link>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12 w-full text-left">
+          
+          <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-6 space-y-3">
+            <div className="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400">
+              <Brain size={20} />
             </div>
+            <h3 className="text-sm font-bold text-zinc-200">Grounded RAG Engine</h3>
+            <p className="text-xs text-zinc-550 leading-relaxed">
+              OpenAI embeddings query PostgreSQL vector stores using strict Row-Level Security isolation.
+            </p>
+          </div>
 
-            {/* MCP Server Status */}
-            <div className="bg-zinc-950 p-5 rounded-xl border border-zinc-800/80 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-zinc-400">MCP Server</span>
-                <span className="text-xs font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">Ready</span>
-              </div>
-              <div className="text-xs text-zinc-500 space-y-1">
-                <p>Transport: <span className="font-mono text-zinc-300">stdio / JSON-RPC</span></p>
-                <p>Tools: <span className="font-mono text-zinc-300">search_knowledge, list_docs...</span></p>
-              </div>
+          <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-6 space-y-3">
+            <div className="h-10 w-10 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-400">
+              <Files size={20} />
             </div>
-
+            <h3 className="text-sm font-bold text-zinc-200">PDF Document Chunker</h3>
+            <p className="text-xs text-zinc-550 leading-relaxed">
+              Extracts layout-preserving text from PDFs, token-splits pages, and handles ingestion streams in the background.
+            </p>
           </div>
-        </div>
 
-        {/* API Response Data */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-300">Live Health Report</h2>
-          <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-850 font-mono text-xs overflow-x-auto min-h-[100px] flex items-center justify-center">
-            {loading ? (
-              <div className="text-zinc-500 animate-pulse">Requesting system credentials...</div>
-            ) : error ? (
-              <div className="text-rose-400 w-full">
-                <p className="font-bold text-rose-500">Connection Failed</p>
-                <p className="mt-1">{error}</p>
-                <p className="mt-2 text-[10px] text-zinc-650">Verify python backend app/main.py is running on port 8000.</p>
-              </div>
-            ) : (
-              <pre className="text-zinc-300 w-full">{JSON.stringify(health, null, 2)}</pre>
-            )}
+          <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-6 space-y-3">
+            <div className="h-10 w-10 bg-pink-500/10 border border-pink-500/20 rounded-xl flex items-center justify-center text-pink-400">
+              <Shield size={20} />
+            </div>
+            <h3 className="text-sm font-bold text-zinc-200">Prompt Injection Guard</h3>
+            <p className="text-xs text-zinc-550 leading-relaxed">
+              Isolates database retrieved chunks inside XML containers to prevent instructions overrides.
+            </p>
           </div>
+
         </div>
 
-        {/* Navigation instructions */}
-        <div className="text-center pt-2 text-xs text-zinc-500">
-          Ready for <span className="text-indigo-400 font-semibold">Phase 2</span>: Supabase and Database Migrations.
-        </div>
       </div>
+
+      {/* 2. SYSTEM STATUS FOOTER */}
+      <footer className="border-t border-zinc-900 bg-zinc-950/80 backdrop-blur-md py-6 px-6">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          
+          <div className="flex items-center gap-6">
+            {/* Backend Integration Status */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">API Services:</span>
+              {loading ? (
+                <span className="text-xs text-zinc-500 animate-pulse">Checking status...</span>
+              ) : error ? (
+                <span className="text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 rounded-full">Offline</span>
+              ) : (
+                <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <CheckCircle2 size={10} /> Online
+                </span>
+              )}
+            </div>
+
+            {/* MCP Status */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">MCP Core:</span>
+              <span className="text-xs font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <MessageSquare size={10} /> Stdio Subprocess
+              </span>
+            </div>
+          </div>
+
+          <div className="text-[10px] text-zinc-650">
+            Powered by Next.js App Router, FastAPI, and Supabase Database.
+          </div>
+
+        </div>
+      </footer>
+
     </main>
   );
 }
