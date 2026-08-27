@@ -12,7 +12,11 @@ class AgentOrchestrator:
         """
         if not settings.OPENAI_API_KEY:
             raise ValueError("OPENAI_API_KEY must be configured in environment.")
-        self.openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        
+        kwargs = {"api_key": settings.OPENAI_API_KEY}
+        if settings.OPENAI_BASE_URL:
+            kwargs["base_url"] = settings.OPENAI_BASE_URL
+        self.openai_client = AsyncOpenAI(**kwargs)
 
     def _get_mcp_tool_definitions(self) -> List[Dict[str, Any]]:
         """
