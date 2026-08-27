@@ -40,7 +40,11 @@ def get_openai_client() -> OpenAI:
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise ValueError("OPENAI_API_KEY must be configured in environment.")
-    return OpenAI(api_key=api_key)
+    base_url = os.getenv("OPENAI_BASE_URL")
+    kwargs = {"api_key": api_key}
+    if base_url:
+        kwargs["base_url"] = base_url
+    return OpenAI(**kwargs)
 
 @mcp.tool()
 async def search_knowledge(
@@ -65,7 +69,8 @@ async def search_knowledge(
         
         response = openai_client.embeddings.create(
             input=[query],
-            model=embedding_model
+            model=embedding_model,
+            dimensions=1536
         )
         query_vector = response.data[0].embedding
         

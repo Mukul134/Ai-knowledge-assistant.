@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     # OpenAI configuration
     OPENAI_API_KEY: str = Field(default="")
+    OPENAI_BASE_URL: str = Field(default="")
     OPENAI_MODEL: str = Field(default="gpt-4o-mini")
     OPENAI_EMBEDDING_MODEL: str = Field(default="text-embedding-3-small")
 

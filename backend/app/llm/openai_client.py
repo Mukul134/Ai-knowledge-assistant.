@@ -10,7 +10,10 @@ class OpenAIClient:
         if not settings.OPENAI_API_KEY:
             raise ValueError("OPENAI_API_KEY must be configured in environment.")
         
-        self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        kwargs = {"api_key": settings.OPENAI_API_KEY}
+        if settings.OPENAI_BASE_URL:
+            kwargs["base_url"] = settings.OPENAI_BASE_URL
+        self.client = AsyncOpenAI(**kwargs)
 
     async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
         """
@@ -24,7 +27,8 @@ class OpenAIClient:
             response = await self.client.embeddings.create(
                 input=texts,
                 model=settings.OPENAI_EMBEDDING_MODEL,
-                timeout=60.0
+                timeout=60.0,
+                dimensions=1536
             )
             # OpenAI returns list of embeddings ordered identically to the inputs list
             return [data.embedding for data in response.data]
