@@ -26,6 +26,10 @@ class MCPClientManager:
 
         # Resolve path to the mcp server script
         server_script = os.path.abspath(settings.MCP_SERVER_PATH)
+        if not os.path.exists(server_script):
+            project_root_script = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", settings.MCP_SERVER_PATH))
+            if os.path.exists(project_root_script):
+                server_script = project_root_script
 
         return StdioServerParameters(
             command=sys.executable,
