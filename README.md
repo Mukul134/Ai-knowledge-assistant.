@@ -1,6 +1,6 @@
-# AI Knowledge Assistant
+# Agentic AI Knowledge Assistant
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Mukul134/agentic-ai-knowledge-assistant)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Mukul134/Ai-knowledge-assistant)
 
 A production-quality Agentic AI Knowledge Assistant that processes user documents, saves page-level embeddings in Supabase (PostgreSQL + pgvector), exposes a standardized interface to an OpenAI-powered Agent via the Anthropic Model Context Protocol (MCP), and serves answers with precise source citations in a Next.js streaming interface.
 
