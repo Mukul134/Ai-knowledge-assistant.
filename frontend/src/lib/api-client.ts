@@ -7,6 +7,22 @@ async function getAuthHeader(): Promise<string | null> {
   return session ? `Bearer ${session.access_token}` : null;
 }
 
+async function handleResponse(response: Response) {
+  if (response.status === 401) {
+    console.warn("Session expired or unauthorized (401). Clearing auth session and redirecting...");
+    await supabase.auth.signOut().catch(() => {});
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+    throw new Error("Session expired. Redirecting to login...");
+  }
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData.detail || `Request failed: ${response.statusText} (${response.status})`);
+  }
+  return response.json();
+}
+
 export const apiClient = {
   async get(endpoint: string) {
     const authHeader = await getAuthHeader();
@@ -14,10 +30,7 @@ export const apiClient = {
     if (authHeader) headers["Authorization"] = authHeader;
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, { headers });
-    if (!response.ok) {
-      throw new Error(`GET request failed: ${response.statusText} (${response.status})`);
-    }
-    return response.json();
+    return handleResponse(response);
   },
 
   async post(endpoint: string, body?: any) {
@@ -32,10 +45,7 @@ export const apiClient = {
       headers,
       body: body ? JSON.stringify(body) : undefined,
     });
-    if (!response.ok) {
-      throw new Error(`POST request failed: ${response.statusText} (${response.status})`);
-    }
-    return response.json();
+    return handleResponse(response);
   },
 
   async put(endpoint: string, body: any) {
@@ -50,10 +60,7 @@ export const apiClient = {
       headers,
       body: JSON.stringify(body),
     });
-    if (!response.ok) {
-      throw new Error(`PUT request failed: ${response.statusText} (${response.status})`);
-    }
-    return response.json();
+    return handleResponse(response);
   },
 
   async delete(endpoint: string) {
@@ -64,11 +71,10 @@ export const apiClient = {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "DELETE",
       headers,
+      // Pass content-type for cross-origin verification if needed
+      headers: { ...headers }
     });
-    if (!response.ok) {
-      throw new Error(`DELETE request failed: ${response.statusText} (${response.status})`);
-    }
-    return response.json();
+    return handleResponse(response);
   },
 
   async uploadFile(endpoint: string, file: File) {
@@ -84,11 +90,7 @@ export const apiClient = {
       headers,
       body: formData,
     });
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.detail || `Upload request failed: ${response.statusText}`);
-    }
-    return response.json();
+    return handleResponse(response);
   },
 
   getStreamUrl(endpoint: string): string {
