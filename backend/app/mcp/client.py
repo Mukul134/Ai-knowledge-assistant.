@@ -18,6 +18,7 @@ class MCPClientManager:
             "SUPABASE_URL": settings.SUPABASE_URL,
             "SUPABASE_ANON_KEY": settings.SUPABASE_ANON_KEY,
             "OPENAI_API_KEY": settings.OPENAI_API_KEY,
+            "OPENAI_BASE_URL": settings.OPENAI_BASE_URL,
             "OPENAI_EMBEDDING_MODEL": settings.OPENAI_EMBEDDING_MODEL,
             "USER_ID": user_id,
             "USER_JWT": jwt_token,
