@@ -1,4 +1,4 @@
-# Agentic AI Knowledge Assistant
+# AI Knowledge Assistant
 
 A production-quality Agentic AI Knowledge Assistant that processes user documents, saves page-level embeddings in Supabase (PostgreSQL + pgvector), exposes a standardized interface to an OpenAI-powered Agent via the Anthropic Model Context Protocol (MCP), and serves answers with precise source citations in a Next.js streaming interface.
 
