@@ -205,6 +205,7 @@ class AgentOrchestrator:
             # (Required by OpenAI API: a tool role message must always follow an assistant role message with tool_calls)
             messages.insert(-len(assistant_tool_calls_payload), {
                 "role": "assistant",
+                "content": None,
                 "tool_calls": assistant_tool_calls_payload
             })
             
