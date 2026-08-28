@@ -1,6 +1,18 @@
 # AI Knowledge Assistant
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=Mukul134/agentic-ai-knowledge-assistant)
+
 A production-quality Agentic AI Knowledge Assistant that processes user documents, saves page-level embeddings in Supabase (PostgreSQL + pgvector), exposes a standardized interface to an OpenAI-powered Agent via the Anthropic Model Context Protocol (MCP), and serves answers with precise source citations in a Next.js streaming interface.
+
+---
+
+## ⚡ Instant One-Click Play (Web Browser)
+
+Click the **Open in GitHub Codespaces** button above to run the entire workspace instantly in your browser:
+1. It automatically builds the container environment and installs Node/Python packages.
+2. It auto-generates your API `.env` configs.
+3. It boots both the FastAPI backend and Next.js frontend in the background.
+4. It opens the web interface in a browser preview tab automatically!
 
 ---
 
