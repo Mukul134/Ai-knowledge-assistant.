@@ -3,19 +3,10 @@ import { supabase } from "./supabase-client";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 async function getAuthHeader(): Promise<string | null> {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session ? `Bearer ${session.access_token}` : null;
+  return "mock-token";
 }
 
 async function handleResponse(response: Response) {
-  if (response.status === 401) {
-    console.warn("Session expired or unauthorized (401). Clearing auth session and redirecting...");
-    await supabase.auth.signOut().catch(() => {});
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
-    }
-    throw new Error("Session expired. Redirecting to login...");
-  }
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
     throw new Error(errData.detail || `Request failed: ${response.statusText} (${response.status})`);

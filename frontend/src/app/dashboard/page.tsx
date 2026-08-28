@@ -81,22 +81,13 @@ export default function WorkspacePage() {
 
   // Hook to check authentication and load base profile
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push("/login");
-        return;
-      }
-      setUserEmail(session.user.email || "");
-      setLoadingSession(false);
+    setUserEmail("developer@example.com");
+    setLoadingSession(false);
 
-      // Load sessions and documents
-      loadSessions();
-      loadDocuments();
-    };
-
-    checkAuth();
-  }, [router]);
+    // Load sessions and documents
+    loadSessions();
+    loadDocuments();
+  }, []);
 
   // Auto-scroll to bottom on new messages or streaming chunks
   useEffect(() => {
@@ -214,16 +205,13 @@ export default function WorkspacePage() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Authentication session expired.");
-
       const streamUrl = apiClient.getStreamUrl(`/api/chat/session/${activeSessionId}/stream`);
 
       const response = await fetch(streamUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`
+          "Authorization": "Bearer mock-token"
         },
         body: JSON.stringify({ message: userPrompt })
       });
