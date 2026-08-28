@@ -21,7 +21,8 @@ import {
   Terminal,
   Database,
   RefreshCw,
-  Edit2
+  Edit2,
+  User
 } from "lucide-react";
 
 interface Session {
@@ -53,10 +54,12 @@ export default function WorkspacePage() {
 
   // Authentication states
   const [userEmail, setUserEmail] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
+  const [userJoined, setUserJoined] = useState<string>("");
   const [loadingSession, setLoadingSession] = useState(true);
 
-  // View state: "chat" or "docs"
-  const [view, setView] = useState<"chat" | "docs">("chat");
+  // View state: "chat" or "docs" or "profile"
+  const [view, setView] = useState<"chat" | "docs" | "profile">("chat");
 
   // Chat sessions state
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -81,13 +84,28 @@ export default function WorkspacePage() {
 
   // Hook to check authentication and load base profile
   useEffect(() => {
-    setUserEmail("developer@example.com");
-    setLoadingSession(false);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+      setUserEmail(session.user.email || "");
+      setUserName(session.user.user_metadata?.full_name || "AI Assistant Member");
+      
+      const joinedDate = session.user.created_at
+        ? new Date(session.user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+        : "Recent Member";
+      setUserJoined(joinedDate);
+      setLoadingSession(false);
 
-    // Load sessions and documents
-    loadSessions();
-    loadDocuments();
-  }, []);
+      // Load sessions and documents
+      loadSessions();
+      loadDocuments();
+    };
+
+    checkAuth();
+  }, [router]);
 
   // Auto-scroll to bottom on new messages or streaming chunks
   useEffect(() => {
@@ -205,13 +223,16 @@ export default function WorkspacePage() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Authentication session expired.");
+
       const streamUrl = apiClient.getStreamUrl(`/api/chat/session/${activeSessionId}/stream`);
 
       const response = await fetch(streamUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer mock-token"
+          "Authorization": `Bearer ${session.access_token}`
         },
         body: JSON.stringify({ message: userPrompt })
       });
@@ -361,29 +382,41 @@ export default function WorkspacePage() {
             <Plus size={14} /> New Conversation
           </button>
           
-          <div className="grid grid-cols-2 gap-1.5 p-1 bg-zinc-950 rounded-xl border border-zinc-850">
+          <div className="grid grid-cols-3 gap-1 p-1 bg-zinc-950 rounded-xl border border-zinc-850">
             <button
               onClick={() => setView("chat")}
-              className={`py-2 rounded-lg font-medium text-xs transition-all ${
+              className={`py-2 rounded-lg font-medium text-[10px] transition-all ${
                 view === "chat"
                   ? "bg-zinc-800 text-zinc-200"
                   : "bg-transparent text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              <span className="flex items-center justify-center gap-1.5">
-                <MessageSquare size={12} /> Chat
+              <span className="flex items-center justify-center gap-1">
+                <MessageSquare size={11} /> Chat
               </span>
             </button>
             <button
               onClick={() => setView("docs")}
-              className={`py-2 rounded-lg font-medium text-xs transition-all ${
+              className={`py-2 rounded-lg font-medium text-[10px] transition-all ${
                 view === "docs"
                   ? "bg-zinc-800 text-zinc-200"
                   : "bg-transparent text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              <span className="flex items-center justify-center gap-1.5">
-                <FolderOpen size={12} /> Files ({documents.length})
+              <span className="flex items-center justify-center gap-1">
+                <FolderOpen size={11} /> Files
+              </span>
+            </button>
+            <button
+              onClick={() => setView("profile")}
+              className={`py-2 rounded-lg font-medium text-[10px] transition-all ${
+                view === "profile"
+                  ? "bg-zinc-800 text-zinc-200"
+                  : "bg-transparent text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              <span className="flex items-center justify-center gap-1">
+                <User size={11} /> Profile
               </span>
             </button>
           </div>
@@ -470,12 +503,12 @@ export default function WorkspacePage() {
             <h1 className="font-extrabold text-sm truncate text-zinc-200">{sessionTitle}</h1>
           </div>
           <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400 bg-zinc-900 border border-zinc-850 px-3.5 py-1 rounded-full backdrop-blur-sm">
-            {view === "chat" ? "Grounded AI Chat" : "Document Engine"}
+            {view === "chat" ? "Grounded AI Chat" : view === "docs" ? "Document Engine" : "Account Profile"}
           </span>
         </div>
 
         {/* View Routing */}
-        {view === "chat" ? (
+        {view === "chat" && (
           
           /* CHAT VIEWPORT */
           <div className="flex-1 flex flex-col min-h-0 bg-zinc-950">
@@ -575,7 +608,9 @@ export default function WorkspacePage() {
               </form>
             </div>
           </div>
-        ) : (
+        )}
+
+        {view === "docs" && (
           
           /* DOCUMENT MANAGER VIEW */
           <div className="flex-1 overflow-y-auto p-8 space-y-8 max-w-4xl mx-auto w-full scrollbar-thin">
@@ -693,6 +728,87 @@ export default function WorkspacePage() {
                   ))
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {view === "profile" && (
+          <div className="flex-1 overflow-y-auto p-8 space-y-8 max-w-4xl mx-auto w-full scrollbar-thin">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <h2 className="text-lg font-bold text-zinc-200">Account Profile Dashboard</h2>
+                <p className="text-xs text-zinc-550 leading-relaxed">
+                  Manage your secure identity credentials and monitor storage utilization statistics.
+                </p>
+              </div>
+
+              {/* Profile Card */}
+              <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 backdrop-blur-sm">
+                <div className="h-20 w-20 rounded-2xl bg-indigo-600/10 border border-indigo-500/25 flex items-center justify-center text-indigo-400 font-extrabold text-2xl shadow-xl shadow-zinc-950 flex-shrink-0">
+                  {userName ? userName.slice(0, 2).toUpperCase() : "AI"}
+                </div>
+                <div className="space-y-2 text-center md:text-left flex-1 min-w-0">
+                  <div>
+                    <h3 className="text-lg font-extrabold text-zinc-100 truncate">{userName}</h3>
+                    <p className="text-xs text-zinc-500 font-mono truncate">{userEmail}</p>
+                  </div>
+                  <div className="flex flex-wrap justify-center md:justify-start gap-4 text-[10px] text-zinc-400">
+                    <span className="bg-zinc-950 border border-zinc-850 px-3 py-1 rounded-full font-medium">Joined {userJoined}</span>
+                    <span className="bg-zinc-950 border border-zinc-850 px-3 py-1 rounded-full font-medium">Role: Authenticated Member</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-zinc-900/20 border border-zinc-900 rounded-xl p-5 space-y-2">
+                  <div className="flex items-center justify-between text-zinc-400">
+                    <span className="text-xs font-semibold">Total Documents</span>
+                    <FolderOpen size={16} className="text-indigo-400" />
+                  </div>
+                  <p className="text-3xl font-extrabold text-zinc-100">{documents.length}</p>
+                  <p className="text-[10px] text-zinc-600">PDF files indexed inside your private vector store</p>
+                </div>
+                
+                <div className="bg-zinc-900/20 border border-zinc-900 rounded-xl p-5 space-y-2">
+                  <div className="flex items-center justify-between text-zinc-400">
+                    <span className="text-xs font-semibold">Conversations</span>
+                    <MessageSquare size={16} className="text-purple-400" />
+                  </div>
+                  <p className="text-3xl font-extrabold text-zinc-100">{sessions.length}</p>
+                  <p className="text-[10px] text-zinc-600">Saved chat session threads</p>
+                </div>
+              </div>
+
+              {/* Settings Core */}
+              <div className="space-y-3 pt-4">
+                <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-1">Infrastructure Settings</h3>
+                <div className="bg-zinc-900/20 border border-zinc-900 rounded-xl p-4.5 space-y-3 text-xs text-zinc-300">
+                  <div className="flex items-center justify-between py-1 border-b border-zinc-850">
+                    <span className="text-zinc-500 font-medium">Database Integration</span>
+                    <span className="font-mono text-zinc-400">Supabase pgvector (active)</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1 border-b border-zinc-850">
+                    <span className="text-zinc-500 font-medium">AI Model Config</span>
+                    <span className="font-mono text-zinc-400">Gemini 2.5 Flash</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-zinc-500 font-medium">Embedding Engine</span>
+                    <span className="font-mono text-zinc-400">Gemini Embedding 2 (1536 dim)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Logout panel */}
+              <div className="pt-6 flex justify-end">
+                <button
+                  onClick={handleLogout}
+                  className="bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 font-bold rounded-xl px-6 py-3 text-xs shadow-md shadow-rose-950/20 flex items-center gap-2 transition-all hover:scale-[1.01]"
+                >
+                  <LogOut size={14} /> Log Out of Profile Session
+                </button>
+              </div>
+
             </div>
           </div>
         )}
