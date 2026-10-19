@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase-client";
 import { apiClient } from "@/lib/api-client";
 import {
   MessageSquare,
@@ -83,13 +84,28 @@ export default function WorkspacePage() {
 
   // Hook to check authentication and load base profile
   useEffect(() => {
-    setUserEmail("Anonymous workspace");
-    setUserName("AI Assistant Member");
-    setUserJoined("Available now");
-    setLoadingSession(false);
-    loadSessions();
-    loadDocuments();
-  }, []);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+      setUserEmail(session.user.email || "");
+      setUserName(session.user.user_metadata?.full_name || "AI Assistant Member");
+      
+      const joinedDate = session.user.created_at
+        ? new Date(session.user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+        : "Recent Member";
+      setUserJoined(joinedDate);
+      setLoadingSession(false);
+
+      // Load sessions and documents
+      loadSessions();
+      loadDocuments();
+    };
+
+    checkAuth();
+  }, [router]);
 
   // Auto-scroll to bottom on new messages or streaming chunks
   useEffect(() => {
@@ -207,12 +223,16 @@ export default function WorkspacePage() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Authentication session expired.");
+
       const streamUrl = apiClient.getStreamUrl(`/api/chat/session/${activeSessionId}/stream`);
 
       const response = await fetch(streamUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
         },
         body: JSON.stringify({ message: userPrompt })
       });
@@ -302,8 +322,9 @@ export default function WorkspacePage() {
     }
   };
 
-  const handleLogout = () => {
-    router.push("/");
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
   };
 
   // Human readable file size conversion helper

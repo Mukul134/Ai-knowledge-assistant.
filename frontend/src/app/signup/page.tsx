@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase-client";
 import { ShieldAlert, ArrowLeft, Loader2, Sparkles, Mail } from "lucide-react";
 
 export default function SignupPage() {
@@ -27,8 +28,32 @@ export default function SignupPage() {
     setSuccess(false);
 
     try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      // Check if user is already confirmed (if email confirmation is turned off in Supabase)
+      if (data.user && data.user.identities && data.user.identities.length > 0) {
+        // If auto-confirmed, redirect straight away
+        if (data.session) {
+          setSuccess(true);
+          setTimeout(() => {
+            router.push("/dashboard");
+          }, 1500);
+          return;
+        }
+      }
+
       setSuccess(true);
-      setTimeout(() => router.push("/dashboard"), 500);
+      setShowOtpInput(true);
     } catch (err: any) {
       console.error("Signup error:", err);
       setError(err.message || "Failed to create account");
@@ -43,6 +68,15 @@ export default function SignupPage() {
     setError(null);
 
     try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode,
+        type: "signup",
+      });
+
+      if (error) throw error;
+
+      // OTP Verification Success! Redirect to dashboard
       router.push("/dashboard");
     } catch (err: any) {
       console.error("OTP verification error:", err);

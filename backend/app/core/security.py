@@ -5,7 +5,7 @@ from pydantic import BaseModel, UUID4
 from app.core.config import settings
 
 # HTTPBearer helper parses the Authorization header
-security = HTTPBearer(auto_error=False)
+security = HTTPBearer()
 
 class CurrentUser(BaseModel):
     id: UUID4
@@ -15,17 +15,11 @@ class CurrentUser(BaseModel):
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> CurrentUser:
-    """Return the shared anonymous workspace identity.
-
-    Authentication is disabled for this deployment, so requests do not need a
-    Supabase token or an Authorization header.
     """
-    return CurrentUser(
-        id="de305d54-75b4-431b-adb2-eb6b9e546013",
-        email="anonymous@workspace.local",
-        role="anonymous",
-    )
-
+    FastAPI dependency to extract and validate the Supabase JWT from the request.
+    Decodes the JWT locally using the SUPABASE_JWT_SECRET for zero-latency authentication,
+    falling back to standard Supabase Auth API validation if local validation fails.
+    """
     token = credentials.credentials
     
     # Check for Phase 1/mock tokens first to allow testing without real Supabase connection

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase-client";
 import { ShieldAlert, ArrowLeft, Loader2, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
@@ -18,6 +19,13 @@ export default function LoginPage() {
     setError(null);
 
     try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Login error:", err);
