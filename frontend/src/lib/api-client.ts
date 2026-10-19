@@ -1,20 +1,13 @@
-import { supabase } from "./supabase-client";
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+// Authentication is intentionally disabled. The backend uses an anonymous workspace user.
 async function getAuthHeader(): Promise<string | null> {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session ? `Bearer ${session.access_token}` : null;
+  return null;
 }
 
 async function handleResponse(response: Response) {
   if (response.status === 401) {
-    console.warn("Session expired or unauthorized (401). Clearing auth session and redirecting...");
-    await supabase.auth.signOut().catch(() => {});
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
-    }
-    throw new Error("Session expired. Redirecting to login...");
+    throw new Error("Request unauthorized.");
   }
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
@@ -70,9 +63,7 @@ export const apiClient = {
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "DELETE",
-      headers,
-      // Pass content-type for cross-origin verification if needed
-      headers: { ...headers }
+      headers
     });
     return handleResponse(response);
   },
