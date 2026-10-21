@@ -15,8 +15,7 @@ class MCPClientManager:
         # Inject standard database credentials and user-session token parameters into the env
         env = {
             **os.environ,
-            "SUPABASE_URL": settings.SUPABASE_URL,
-            "SUPABASE_ANON_KEY": settings.SUPABASE_ANON_KEY,
+        "DATABASE_URL": settings.DATABASE_URL or settings.POSTGRES_URL,
             "OPENAI_API_KEY": settings.OPENAI_API_KEY,
             "OPENAI_BASE_URL": settings.OPENAI_BASE_URL,
             "OPENAI_EMBEDDING_MODEL": settings.OPENAI_EMBEDDING_MODEL,

@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from supabase import Client
+from app.database.supabase import Client
 from app.llm.openai_client import openai_helper
 
 class DocumentRetriever:

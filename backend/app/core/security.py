@@ -32,11 +32,12 @@ async def get_current_user(
         )
         
     try:
-        # 1. Local JWT Decoding (HS256 is the default for Supabase tokens)
-        if settings.SUPABASE_JWT_SECRET:
+        # 1. Optional local JWT validation when a deployment provides a secret.
+        jwt_secret = getattr(settings, "JWT_SECRET", "")
+        if jwt_secret:
             payload = jwt.decode(
                 token,
-                settings.SUPABASE_JWT_SECRET,
+                jwt_secret,
                 algorithms=["HS256"],
                 audience="authenticated"
             )
@@ -55,23 +56,11 @@ async def get_current_user(
                 role=payload.get("role", "authenticated")
             )
             
-        # 2. Remote Validation Fallback (Queries Supabase Auth Server directly)
-        else:
-            from app.database.supabase import get_supabase_client
-            supabase = get_supabase_client()
-            response = supabase.auth.get_user(token)
-            
-            if not response or not response.user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Token verification failed on Supabase authentication server"
-                )
-                
-            return CurrentUser(
-                id=response.user.id,
-                email=response.user.email,
-                role=response.user.role or "authenticated"
-            )
+        # Authentication is intentionally disabled unless a JWT secret is configured.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication is not configured. Use a development mock token or configure JWT_SECRET."
+        )
             
     except jwt.ExpiredSignatureError:
         raise HTTPException(

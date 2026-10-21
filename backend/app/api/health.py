@@ -14,5 +14,5 @@ async def health_check():
         "project": settings.PROJECT_NAME,
         "environment": settings.ENVIRONMENT,
         "openai_configured": bool(settings.OPENAI_API_KEY),
-        "supabase_configured": bool(settings.SUPABASE_URL and settings.SUPABASE_ANON_KEY)
+        "database_configured": bool(settings.DATABASE_URL or settings.POSTGRES_URL)
     }

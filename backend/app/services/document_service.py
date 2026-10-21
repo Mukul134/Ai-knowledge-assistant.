@@ -2,7 +2,7 @@ import os
 import uuid
 from typing import List, Dict, Any
 from fastapi import UploadFile, HTTPException, status, BackgroundTasks
-from supabase import Client
+from app.database.supabase import Client
 from app.database.supabase import get_supabase_client, get_supabase_user_client
 from app.core.security import CurrentUser
 from app.rag.parser import PDFParser
