@@ -70,9 +70,8 @@ export const apiClient = {
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "DELETE",
-      headers,
       // Pass content-type for cross-origin verification if needed
-      headers: { ...headers }
+      headers,
     });
     return handleResponse(response);
   },
