@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase-client";
 import { apiClient } from "@/lib/api-client";
 import {
   MessageSquare,
@@ -85,21 +84,12 @@ export default function WorkspacePage() {
   // Hook to check authentication and load base profile
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push("/login");
-        return;
-      }
-      setUserEmail(session.user.email || "");
-      setUserName(session.user.user_metadata?.full_name || "AI Assistant Member");
-      
-      const joinedDate = session.user.created_at
-        ? new Date(session.user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
-        : "Recent Member";
-      setUserJoined(joinedDate);
+      setUserEmail("Guest workspace");
+      setUserName("AI Knowledge Assistant");
+      setUserJoined("Available without an account");
       setLoadingSession(false);
 
-      // Load sessions and documents
+      // Load sessions and documents from the configured backend database.
       loadSessions();
       loadDocuments();
     };
@@ -223,16 +213,12 @@ export default function WorkspacePage() {
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Authentication session expired.");
-
       const streamUrl = apiClient.getStreamUrl(`/api/chat/session/${activeSessionId}/stream`);
 
       const response = await fetch(streamUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session.access_token}`
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ message: userPrompt })
       });
@@ -322,9 +308,8 @@ export default function WorkspacePage() {
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
+  const handleLogout = () => {
+    router.push("/");
   };
 
   // Human readable file size conversion helper
