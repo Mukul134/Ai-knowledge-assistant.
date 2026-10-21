@@ -1,4 +1,6 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// In production the backend URL must be configured. Avoiding a localhost fallback
+// prevents the browser from trying to reach the user's own machine from a deployment.
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
 async function getAuthHeader(): Promise<string | null> {
   return null;

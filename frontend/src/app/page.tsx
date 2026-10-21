@@ -9,7 +9,8 @@ interface HealthData {
   project: string;
   environment: string;
   openai_configured: boolean;
-  supabase_configured: boolean;
+  database_configured?: boolean;
+  database_status?: string;
 }
 
 export default function Home() {
@@ -20,7 +21,7 @@ export default function Home() {
   useEffect(() => {
     const fetchHealth = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
         const response = await fetch(`${apiUrl}/api/health`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -144,7 +145,7 @@ export default function Home() {
               {loading ? (
                 <span className="text-xs text-zinc-500 animate-pulse">Checking...</span>
               ) : error ? (
-                <span className="text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 rounded-full">Offline</span>
+                <span title={error} className="text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-0.5 rounded-full">API unavailable</span>
               ) : (
                 <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                   <CheckCircle2 size={10} /> Online
@@ -164,7 +165,7 @@ export default function Home() {
           </div>
 
           <div className="text-[10px] text-zinc-600">
-            Next.js 16 • FastAPI • Supabase • Gemini API
+            Next.js 16 • FastAPI • Neon Postgres • Gemini API
           </div>
 
         </div>
