@@ -23,9 +23,16 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = Field(default="gpt-4o-mini")
     OPENAI_EMBEDDING_MODEL: str = Field(default="text-embedding-3-small")
 
-    # Neon PostgreSQL configuration
+    # Database configuration
     DATABASE_URL: str = Field(default="")
     POSTGRES_URL: str = Field(default="")
+
+    # Supabase Auth configuration used to validate frontend access tokens.
+    # Keep secret credentials server-side only; never expose them to the frontend.
+    SUPABASE_URL: str = Field(default="")
+    SUPABASE_PUBLISHABLE_KEY: str = Field(default="")
+    SUPABASE_SECRET_KEY: str = Field(default="")
+    SUPABASE_JWKS_URL: str = Field(default="")
     JWT_SECRET: str = Field(default="")
 
     # MCP configuration
