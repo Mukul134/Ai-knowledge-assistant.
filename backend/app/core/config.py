@@ -23,11 +23,10 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = Field(default="gpt-4o-mini")
     OPENAI_EMBEDDING_MODEL: str = Field(default="text-embedding-3-small")
 
-    # Supabase configuration
-    SUPABASE_URL: str = Field(default="")
-    SUPABASE_ANON_KEY: str = Field(default="")
-    SUPABASE_SERVICE_ROLE_KEY: str = Field(default="")
-    SUPABASE_JWT_SECRET: str = Field(default="")
+    # Neon PostgreSQL configuration
+    DATABASE_URL: str = Field(default="")
+    POSTGRES_URL: str = Field(default="")
+    JWT_SECRET: str = Field(default="")
 
     # MCP configuration
     MCP_SERVER_PATH: str = Field(default="mcp-server/mcp_server.py")
