@@ -21,7 +21,7 @@ export default function Home() {
   useEffect(() => {
     const fetchHealth = async () => {
       try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "https://backend-jet-alpha-76.vercel.app").replace(/\/$/, "");
         const response = await fetch(`${apiUrl}/api/health`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

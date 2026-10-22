@@ -1,6 +1,9 @@
 // In production the backend URL must be configured. Avoiding a localhost fallback
 // prevents the browser from trying to reach the user's own machine from a deployment.
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+const DEPLOYED_API_URL = "https://backend-jet-alpha-76.vercel.app";
+
+// Use the configured backend in deployments, with the known production backend as a safe fallback.
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || DEPLOYED_API_URL).replace(/\/$/, "");
 
 async function getAuthHeader(): Promise<string | null> {
   return null;
