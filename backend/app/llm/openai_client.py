@@ -4,16 +4,17 @@ from app.core.config import settings
 
 class OpenAIClient:
     def __init__(self):
+        """Create the model client when credentials are available.
+
+        The API health endpoint must remain available even when optional AI
+        credentials have not been configured in a deployment.
         """
-        Initialize the AsyncOpenAI client as a singleton resource.
-        """
-        if not settings.OPENAI_API_KEY:
-            raise ValueError("OPENAI_API_KEY must be configured in environment.")
-        
-        kwargs = {"api_key": settings.OPENAI_API_KEY}
-        if settings.OPENAI_BASE_URL:
-            kwargs["base_url"] = settings.OPENAI_BASE_URL
-        self.client = AsyncOpenAI(**kwargs)
+        self.client: AsyncOpenAI | None = None
+        if settings.OPENAI_API_KEY:
+            kwargs = {"api_key": settings.OPENAI_API_KEY}
+            if settings.OPENAI_BASE_URL:
+                kwargs["base_url"] = settings.OPENAI_BASE_URL
+            self.client = AsyncOpenAI(**kwargs)
 
     async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
         """
@@ -22,6 +23,8 @@ class OpenAIClient:
         """
         if not texts:
             return []
+        if self.client is None:
+            raise RuntimeError("AI embeddings are unavailable because OPENAI_API_KEY is not configured.")
 
         try:
             response = await self.client.embeddings.create(
